@@ -3,7 +3,7 @@ const {v4: uuidv4 } = require('uuid');
 const HttpError = require('../models/http-error');
 
 
-const DUMMY_FILE = [
+let DUMMY_FILE = [
     {
         id: 'e1',
         title: 'Test Journal',
@@ -27,11 +27,11 @@ const getFileByEdtiorId = (req, res, next) => {
 
 const getFilesByUserId = (req, res, next) => {
     const userId = req.params.uid;
-    const userFiles = DUMMY_FILE.find( u => {
+    const userFiles = DUMMY_FILE.filter( u => {
         return u.creator === userId;
     });
 
-    if(!userFiles){
+    if(!userFiles || userFiles.length === 0){
         return next(new HttpError('Could not find journals for user.', 404));
     }   
 
@@ -53,19 +53,22 @@ const postNewFile = (req, res, next) => {
 }
 
 const patchEditorFile = (req, res, next) => {
+    const {title, editorValue} = req.body;
     const editorId = req.params.eid;
-    const fileToEdit = DUMMY_FILE.find( e => {
-        return e.id === editorId;
-    });
-    
+    const fileToEdit = {...DUMMY_FILE.find( e => e.id === editorId)};
+    const fileIndex = DUMMY_FILE.findIndex( e => e.id === editorId);
+    fileToEdit.title = title;
+    fileToEdit.editorValue = editorValue;
+
+    DUMMY_FILE[fileIndex] = fileToEdit;
+
+    res.status(200).json({place: fileToEdit});
 }
 
 const deleteEditorFile = (req, res, next) => {
     const editorId = req.params.eid;
-    const fileToEdit = DUMMY_FILE.find( e => {
-        return e.id === editorId;
-    });
-    DUMMY_FILE.pop(fileToEdit);
+    DUMMY_FILE = DUMMY_FILE.filter(e => e.id !== editorId);
+    res.status(200).json({message: 'Deleted Editor File'});
 }
 
 exports.getFileByEdtiorId = getFileByEdtiorId;

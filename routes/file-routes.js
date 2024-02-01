@@ -7,5 +7,7 @@ const router = express.Router();
 router.get('/:eid', fileController.getFileByEdtiorId);
 router.get('/user/:uid', fileController.getFilesByUserId);
 router.post('/', fileController.postNewFile);
+router.patch('/:eid', fileController.patchEditorFile);
+router.delete('/:eid', fileController.deleteEditorFile);
 
 module.exports = router;
