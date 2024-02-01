@@ -1,2 +1,3 @@
 # jeffing_server
-node server for personal apps
+
+Local Host server built with Node.js and Express
