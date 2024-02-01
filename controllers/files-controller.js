@@ -71,3 +71,5 @@ const deleteEditorFile = (req, res, next) => {
 exports.getFileByEdtiorId = getFileByEdtiorId;
 exports.getFilesByUserId = getFilesByUserId;
 exports.postNewFile = postNewFile;
+exports.patchEditorFile = patchEditorFile;
+exports.deleteEditorFile = deleteEditorFile;
