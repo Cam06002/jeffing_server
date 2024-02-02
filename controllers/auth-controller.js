@@ -1,5 +1,6 @@
 const {v4: uuidv4 } = require('uuid');
 const {validationResult} = require('express-validator');
+const MongoClient = require('mongodb').MongoClient;
 
 const HttpError = require('../models/http-error');
 

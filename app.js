@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 
 const HttpError = require('./models/http-error');
 const fileRoutes = require('./routes/file-routes');
@@ -25,4 +26,12 @@ app.use((error, req, res, next) => {
     res.json({message: error.message || 'An unknown error occurred!'});
 });
 
-app.listen(5000);
+mongoose
+    .connect('mongodb+srv://jeffing_writer:Gok40267!@test0.p6uc4vv.mongodb.net/?retryWrites=true&w=majority')
+    .then(() => {
+        app.listen(5000);
+    })
+    .catch( err => {
+        console.log(err);
+    });
+

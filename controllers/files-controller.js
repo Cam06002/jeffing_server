@@ -2,6 +2,7 @@ const {v4: uuidv4 } = require('uuid');
 const {validationResult} = require('express-validator');
 
 const HttpError = require('../models/http-error');
+const Editor = require('../models/editorModel');
 
 let DUMMY_FILE = [
     {
@@ -38,21 +39,24 @@ const getFilesByUserId = (req, res, next) => {
     res.json({userFiles});
 }
 
-const postNewFile = (req, res, next) => {
+const postNewFile =  async (req, res, next) => {
     const validationErrors = validationResult(req);
     if (!validationErrors.isEmpty()){
         return next(new HttpError('Empty title or body. Could not save.', 422));
     }
 
     const {title, creator, editorValue} = req.body;
-    const createdFile = {
-        id: uuidv4(),
+    const createdFile = new Editor({
         title,
         creator,
         editorValue
-    }
+    });
 
-    DUMMY_FILE.unshift(createdFile);
+    try {
+        await createdFile.save();
+    } catch (err) {
+        return next( new HttpError('Unable to save file', 500));
+    }
 
     res.status(201).json({file: createdFile});
 }
