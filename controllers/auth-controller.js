@@ -1,17 +1,7 @@
-const {v4: uuidv4 } = require('uuid');
 const {validationResult} = require('express-validator');
-const MongoClient = require('mongodb').MongoClient;
 
 const HttpError = require('../models/http-error');
-
-const DUMMY_USERS = [
-    {
-        id: 'u1',
-        name: 'Bob Wehadababyitsaboy',
-        email: 'bob@bob.com',
-        password: 'test1234'
-    }
-]
+const User = require('../models/usersModel');
 
 const login = (req, res, next) => {
     const {email, password} = req.body;
@@ -24,29 +14,39 @@ const login = (req, res, next) => {
     res.json({message: 'Logged in!'});
 }
 
-const register = (req, res, next) => {
+const register = async (req, res, next) => {
     const validationErrors = validationResult(req);
     if (!validationErrors.isEmpty()){
         return next(new HttpError('Invalid name, email or password. Please try again.', 422));
     }
 
-    const {name, email, password} = req.body;
+    const {name, email, password, editors} = req.body;
 
-    const userExists = DUMMY_USERS.find(u => u.email === email);
-    if (userExists) {
-        return next (new HttpError('User email alread exists. Could not create user.', 422));
+    let existingUser;
+    try{
+        existingUser = await User.findOne({email: email});
+    } catch (err) {
+        return next(new HttpError('Signing up failed. Please try again.', 500));
     }
 
-    const createdUser = {
-        id: uuidv4(),
+    if (existingUser) {
+        return next(new HttpError('User already exists. Please log in.', 422));
+    }
+
+    const createdUser = new User({
         name,
         email,
-        password
+        password,
+        editors
+    });
+
+    try {
+        await createdUser.save();
+    } catch (err) {
+        return next(new HttpError('Signing up failed. Please try again.', 500));
     }
 
-    DUMMY_USERS.push(createdUser);
-   
-    res.status(201).json({user: createdUser});
+    res.status(201).json({user: createdUser.toObject({getters: true})});
 }
 
 exports.login = login;
