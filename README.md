@@ -1,3 +1,3 @@
 # jeffing_server
 
-Local Host server built with Node.js and Express
+Local Host server built with Node.js and Express, connects to MongoDB database.

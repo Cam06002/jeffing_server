@@ -1,7 +1,9 @@
 const {validationResult} = require('express-validator');
+const mongoose = require('mongoose');
 
 const HttpError = require('../models/http-error');
 const Editor = require('../models/editorModel');
+const User = require('../models/usersModel');
 
 const getFileByEdtiorId = async (req, res, next) => {
     const editorId = req.params.eid;
@@ -50,10 +52,26 @@ const postNewFile =  async (req, res, next) => {
         editorValue
     });
 
+    let user;
     try {
-        await createdFile.save();
+        user = await User.findById(creator);
     } catch (err) {
-        return next( new HttpError('Unable to save file', 500));
+        return next( new HttpError('Unable to save file.', 500));
+    }
+
+    if (!user) {
+        return next( new HttpError('Could not find user for provided ID.', 404));
+    }
+
+    try {
+        const sess = await mongoose.startSession();
+        sess.startTransaction();
+        await createdFile.save({session: sess});
+        user.editors.push(createdFile);
+        await user.save({session: sess});
+        await sess.commitTransaction();
+    } catch (err) {
+        return next( new HttpError('Unable to save file.', 500));
     }
 
     res.status(201).json({file: createdFile});
@@ -93,13 +111,23 @@ const deleteEditorFile = async (req, res, next) => {
     
     let editor;
     try {
-        editor = await Editor.findById(editorId);
+        editor = await Editor.findById(editorId).populate('creator');
     } catch (err) {
         return next( new HttpError('Something went wrong. Unable to find file for deletion.', 500));
     }
 
+    if (!editor) {
+        return next (new HttpError('Unalbe to find editor with this ID.', 404));
+    }
+
     try {
-        await editor.deleteOne();
+        const sess = await mongoose.startSession();
+        sess.startTransaction();
+        await editor.deleteOne({session: sess});
+        editor.creator.editors.pull(editor);
+        await editor.creator.save({session: sess});
+        await sess.commitTransaction();
+        
     } catch (err) {
         return next( new HttpError('Something went wrong. Unable to delete file.', 500));
     }

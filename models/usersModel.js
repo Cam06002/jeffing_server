@@ -8,7 +8,7 @@ const usersSchema = new Schema({
     name: {type: String, required: true},
     email: {type: String, required: true, unique: true},
     password: {type: String, required: true, minlength: 8},
-    editors: {type: String, required: true}
+    editors: [{type: mongoose.Types.ObjectId, required: true, ref: 'Editor'}]
 });
 
 usersSchema.plugin(uniqueValidator);
