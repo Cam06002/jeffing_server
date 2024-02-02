@@ -1,7 +1,7 @@
 const {v4: uuidv4 } = require('uuid');
+const {validationResult} = require('express-validator');
 
 const HttpError = require('../models/http-error');
-
 
 let DUMMY_FILE = [
     {
@@ -39,6 +39,11 @@ const getFilesByUserId = (req, res, next) => {
 }
 
 const postNewFile = (req, res, next) => {
+    const validationErrors = validationResult(req);
+    if (!validationErrors.isEmpty()){
+        return next(new HttpError('Empty title or body. Could not save.', 422));
+    }
+
     const {title, creator, editorValue} = req.body;
     const createdFile = {
         id: uuidv4(),
@@ -53,6 +58,11 @@ const postNewFile = (req, res, next) => {
 }
 
 const patchEditorFile = (req, res, next) => {
+    const validationErrors = validationResult(req);
+    if (!validationErrors.isEmpty()){
+        return next(new HttpError('Empty title or body. Could not save.', 422));
+    }
+
     const {title, editorValue} = req.body;
     const editorId = req.params.eid;
     const fileToEdit = {...DUMMY_FILE.find( e => e.id === editorId)};
@@ -67,6 +77,9 @@ const patchEditorFile = (req, res, next) => {
 
 const deleteEditorFile = (req, res, next) => {
     const editorId = req.params.eid;
+    if(!DUMMY_FILE.find(e => e.id === editorId)){
+        return next(new HttpError('File not found.', 404));
+    }
     DUMMY_FILE = DUMMY_FILE.filter(e => e.id !== editorId);
     res.status(200).json({message: 'Deleted Editor File'});
 }
