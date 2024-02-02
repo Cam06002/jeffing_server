@@ -1,42 +1,40 @@
-const {v4: uuidv4 } = require('uuid');
 const {validationResult} = require('express-validator');
 
 const HttpError = require('../models/http-error');
 const Editor = require('../models/editorModel');
 
-let DUMMY_FILE = [
-    {
-        id: 'e1',
-        title: 'Test Journal',
-        creator: 'u1',
-        editorValue: 'This is my first journal entry.'
-    }
-];
-
-const getFileByEdtiorId = (req, res, next) => {
+const getFileByEdtiorId = async (req, res, next) => {
     const editorId = req.params.eid;
-    const journal = DUMMY_FILE.find(e => {
-        return e.id === editorId;
-    });
+
+    let journal;
+    try {
+        journal = await Editor.findById(editorId);
+    } catch (err) {
+        return next( new HttpError('Unable to find editor file', 500));
+    }
 
     if(!journal){
        return next(new HttpError('Could not find journal by editor ID.', 404));
     }
 
-    res.json({journal});
+    res.json({journal: journal.toObject({getters: true})});
 }
 
-const getFilesByUserId = (req, res, next) => {
+const getFilesByUserId = async (req, res, next) => {
     const userId = req.params.uid;
-    const userFiles = DUMMY_FILE.filter( u => {
-        return u.creator === userId;
-    });
+
+    let userFiles;
+    try {
+        userFiles = await Editor.find({creator: userId});
+    } catch (err) {
+        return next( new HttpError('Something went wrong. Unable to find editor files for user', 500));
+    }
 
     if(!userFiles || userFiles.length === 0){
         return next(new HttpError('Could not find journals for user.', 404));
     }   
 
-    res.json({userFiles});
+    res.json({userFiles: userFiles.map(file => file.toObject({getters: true}))});
 }
 
 const postNewFile =  async (req, res, next) => {
@@ -61,7 +59,7 @@ const postNewFile =  async (req, res, next) => {
     res.status(201).json({file: createdFile});
 }
 
-const patchEditorFile = (req, res, next) => {
+const patchEditorFile = async (req, res, next) => {
     const validationErrors = validationResult(req);
     if (!validationErrors.isEmpty()){
         return next(new HttpError('Empty title or body. Could not save.', 422));
@@ -69,22 +67,43 @@ const patchEditorFile = (req, res, next) => {
 
     const {title, editorValue} = req.body;
     const editorId = req.params.eid;
-    const fileToEdit = {...DUMMY_FILE.find( e => e.id === editorId)};
-    const fileIndex = DUMMY_FILE.findIndex( e => e.id === editorId);
-    fileToEdit.title = title;
-    fileToEdit.editorValue = editorValue;
 
-    DUMMY_FILE[fileIndex] = fileToEdit;
+    let editor;
 
-    res.status(200).json({place: fileToEdit});
+    try {
+        editor = await Editor.findById(editorId);
+    } catch (err) {
+        return next( new HttpError('Unable to update file.', 500));
+    }
+
+    editor.title = title;
+    editor.editorValue = editorValue;
+
+    try {
+        await editor.save();
+    } catch (err) {
+        return next( new HttpError('Something went wrong. Unable to update file.', 500));
+    }
+
+    res.status(200).json({editor: editor.toObject({getters: true})});
 }
 
-const deleteEditorFile = (req, res, next) => {
+const deleteEditorFile = async (req, res, next) => {
     const editorId = req.params.eid;
-    if(!DUMMY_FILE.find(e => e.id === editorId)){
-        return next(new HttpError('File not found.', 404));
+    
+    let editor;
+    try {
+        editor = await Editor.findById(editorId);
+    } catch (err) {
+        return next( new HttpError('Something went wrong. Unable to find file for deletion.', 500));
     }
-    DUMMY_FILE = DUMMY_FILE.filter(e => e.id !== editorId);
+
+    try {
+        await editor.deleteOne();
+    } catch (err) {
+        return next( new HttpError('Something went wrong. Unable to delete file.', 500));
+    }
+
     res.status(200).json({message: 'Deleted Editor File'});
 }
 
