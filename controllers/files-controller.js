@@ -55,8 +55,9 @@ const postNewFile =  async (req, res, next) => {
     let user;
     try {
         user = await User.findById(creator);
+        console.log(user);
     } catch (err) {
-        return next( new HttpError('Unable to save file.', 500));
+        return next( new HttpError('Unable to save file. Please try again.', 500));
     }
 
     if (!user) {
@@ -71,7 +72,7 @@ const postNewFile =  async (req, res, next) => {
         await user.save({session: sess});
         await sess.commitTransaction();
     } catch (err) {
-        return next( new HttpError('Unable to save file.', 500));
+        return next( new HttpError('Unable to save file. Session error.', 500));
     }
 
     res.status(201).json({file: createdFile});
