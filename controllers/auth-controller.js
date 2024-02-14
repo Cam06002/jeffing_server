@@ -30,12 +30,13 @@ const login = async (req, res, next) => {
     if (!isValidPassword) {
         return next(new HttpError('Incorrect password. Please try again.', 500));
     }
+    let userObject = existingUser.toObject({getters: true});
 
     let token;
     try {
         token = jwt.sign(
-            { user: existingUser.id, 
-            email: existingUser.email }, 
+            { user: userObject.id, 
+            email: userObject.email }, 
             'jeffingsecret3keyforstuff', 
             {expiresIn: '8h'}
         );
@@ -43,7 +44,7 @@ const login = async (req, res, next) => {
         return next(new HttpError('Logging in failed. Please try again.', 500));
     }
    
-    res.json({userId: existingUser.id, email: existingUser.email, token: token });
+    res.json({userId: userObject.id, email: userObject.email, token: token });
 }
 
 const register = async (req, res, next) => {
@@ -85,11 +86,12 @@ const register = async (req, res, next) => {
         return next(new HttpError('Signing up failed. Please try again.', 500));
     }
 
+    let userObject = createdUser.toObject({getters: true});
     let token;
     try {
         token = jwt.sign(
-            { user: createdUser.id, 
-            email: createdUser.email }, 
+            { user: userObject.id, 
+            email: userObject.email }, 
             'jeffingsecret3keyforstuff', 
             {expiresIn: '8h'}
         );
@@ -97,7 +99,7 @@ const register = async (req, res, next) => {
         return next(new HttpError('Signing up failed. Please try again.', 500));
     }
 
-    res.status(201).json({userId: createdUser.id, email: createdUser.email, token: token });
+    res.status(201).json({userId: userObject.id, email: userObject.email, token: token });
 }
 
 exports.login = login;

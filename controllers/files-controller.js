@@ -55,7 +55,6 @@ const postNewFile =  async (req, res, next) => {
     let user;
     try {
         user = await User.findById(creator);
-        console.log(user);
     } catch (err) {
         return next( new HttpError('Unable to save file. Please try again.', 500));
     }
@@ -93,6 +92,10 @@ const patchEditorFile = async (req, res, next) => {
         editor = await Editor.findById(editorId);
     } catch (err) {
         return next( new HttpError('Unable to update file.', 500));
+    }
+
+    if (editor.creator.toString() !== req.userData.userId) {
+        return next(new HttpError('You are not allowed to edit this file', 401));
     }
 
     editor.title = title;
