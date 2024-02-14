@@ -2,8 +2,11 @@ const express = require('express');
 const {check} = require('express-validator');
 
 const fileController = require('../controllers/files-controller');
+const checkAuth = require('../middleware/check-auth');
 
 const router = express.Router();
+
+router.use(checkAuth);
 
 router.get('/:eid', fileController.getFileByEdtiorId);
 router.get('/user/:uid', fileController.getFilesByUserId);
