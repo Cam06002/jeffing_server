@@ -124,6 +124,10 @@ const deleteEditorFile = async (req, res, next) => {
         return next (new HttpError('Unalbe to find editor with this ID.', 404));
     }
 
+    if (editor.creator.id !== req.userData.userId) {
+        return next(new HttpError('You are not allowed to deleten this file', 401));
+    }
+
     try {
         const sess = await mongoose.startSession();
         sess.startTransaction();
