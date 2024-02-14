@@ -75,7 +75,7 @@ const postNewFile =  async (req, res, next) => {
         return next( new HttpError('Unable to save file. Session error.', 500));
     }
 
-    res.status(201).json({file: createdFile});
+    res.status(201).json({editor: createdFile.toObject({getters: true})});
 }
 
 const patchEditorFile = async (req, res, next) => {
