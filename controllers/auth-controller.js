@@ -37,7 +37,7 @@ const login = async (req, res, next) => {
         token = jwt.sign(
             { user: userObject.id, 
             email: userObject.email }, 
-            'jeffingsecret3keyforstuff', 
+            process.env.JWT_KEY, 
             {expiresIn: '8h'}
         );
     } catch (err) {
@@ -92,7 +92,7 @@ const register = async (req, res, next) => {
         token = jwt.sign(
             { user: userObject.id, 
             email: userObject.email }, 
-            'jeffingsecret3keyforstuff', 
+            process.env.JWT_KEY, 
             {expiresIn: '8h'}
         );
     } catch (err) {

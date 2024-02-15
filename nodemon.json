@@ -1,0 +1,9 @@
+{
+    "env": {
+        "DB_USER": "jeffing_writer",
+        "DB_PASSWORD": "Gok40267!",
+        "DB_NAME": "test0",
+        "JWT_KEY": "jeffingsecret3keyforstuff"
+    }
+}
+
