@@ -4,4 +4,4 @@ env_variables:
   DB_USER: "jeffing_production"
   DB_PASSWORD: "myJeffingNeeds2Work"
   DB_NAME: "test0"
-  JWT_KEY: "myJeffing3Key!thatWorks"
+  JWT_KEY: "myJeffing3KeythatWorks"

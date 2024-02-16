@@ -42,5 +42,3 @@ mongoose
     .catch( err => {
         console.log(err);
     });
-
-//is mongoose causing error?
