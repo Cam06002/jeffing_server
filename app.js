@@ -35,7 +35,7 @@ app.use((error, req, res, next) => {
 });
 
 mongoose
-    .connect(`mongodb+srv://${process.env.DB_USER}:${process.env.PASSWORD}@test0.p6uc4vv.mongodb.net/?retryWrites=true&w=majority`)
+    .connect(`mongodb+srv://${process.env.DB_USER}:${process.env.PASSWORD}@${process.env.DB_NAME}.p6uc4vv.mongodb.net/?retryWrites=true&w=majority`)
     .then(() => {
         app.listen(process.env.PORT || 8080);
     })
