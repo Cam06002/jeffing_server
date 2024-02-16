@@ -1,1 +1,7 @@
 runtime: nodejs20
+
+env_variables:
+  DB_USER: "jeffing_production",
+  DB_PASSWORD: "WKPu5udAfM4OoZOo",
+  DB_NAME: "TextProd",
+  JWT_KEY: "myJeffing3Key!thatWorks"
