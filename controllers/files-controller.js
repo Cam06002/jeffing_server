@@ -85,8 +85,6 @@ const patchEditorFile = async (req, res, next) => {
 
     const {title, editorValue} = req.body;
     const editorId = req.params.eid;
-    console.log(editor.creator.toString());
-    console.log(req.userData.userId);
 
     let editor;
 
