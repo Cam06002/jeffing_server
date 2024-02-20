@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const HttpError = require('../models/http-error');
 const Editor = require('../models/editorModel');
 const User = require('../models/usersModel');
+const Encryption = require('../encryption');
 
 const getFileByEdtiorId = async (req, res, next) => {
     const editorId = req.params.eid;
@@ -11,6 +12,7 @@ const getFileByEdtiorId = async (req, res, next) => {
     let journal;
     try {
         journal = await Editor.findById(editorId);
+        journal.editorVale = Encryption.decryptEditor(journal.editorValue, process.env.ENC_KEY);
     } catch (err) {
         return next( new HttpError('Unable to find editor file', 500));
     }
@@ -46,10 +48,12 @@ const postNewFile =  async (req, res, next) => {
     }
 
     const {title, creator, editorValue} = req.body;
+    let editorJSON = JSON.stringify(editorValue);
+    let encryptedEditor = Encryption.encryptEditor(editorJSON, process.env.ENC_KEY)
     const createdFile = new Editor({
         title,
         creator,
-        editorValue
+        encryptedEditor
     });
 
     let user;
@@ -84,8 +88,10 @@ const patchEditorFile = async (req, res, next) => {
     }
 
     const {title, editorValue} = req.body;
-    const editorId = req.params.eid;
+    let editorJSON = JSON.stringify(editorValue);
+    let encryptedEditor = Encryption.encryptEditor(editorJSON, process.env.ENC_KEY);
 
+    const editorId = req.params.eid;
     let editor;
 
     try {
@@ -99,7 +105,7 @@ const patchEditorFile = async (req, res, next) => {
     }
 
     editor.title = title;
-    editor.editorValue = editorValue;
+    editor.editorValue = encryptedEditor;
 
     try {
         await editor.save();

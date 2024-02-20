@@ -1,7 +1,0 @@
-runtime: nodejs20
-
-env_variables:
-  DB_USER: "jeffing_production"
-  DB_PASSWORD: "myJeffingNeedsTwoWork"
-  DB_NAME: "test0"
-  JWT_KEY: "myJeffingKeythatWorks"
