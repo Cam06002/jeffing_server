@@ -131,7 +131,7 @@ const deleteEditorFile = async (req, res, next) => {
     }
 
     if (editor.creator.id !== req.userData.userId) {
-        return next(new HttpError('You are not allowed to deleten this file', 401));
+        return next(new HttpError('You are not allowed to delete this file', 401));
     }
 
     try {
